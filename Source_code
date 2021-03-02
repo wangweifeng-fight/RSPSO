@@ -1,1 +1,94 @@
+%源代码
+%%随机权重
+clear
+clc
+
+%%预设参数
+n=10;
+d=2;
+cmax=2.0;
+cmin=0.8;
+k=30;
+wmax=0.9;
+wmin=0.4;
+delta=0.5;
+
+
+%%分布粒子
+% for i=1:n
+%     for j=1:d
+%         x(i,j)=randn;
+%         v(i,j)=randn;
+%     end
+% end
+x=100*rand(n,d);
+v=-5+10*rand(n,d);
+
+%%计算粒子适应度
+fit=zeros(n,1);
+for j=1:n
+    fit(j)=myfun(x(j,:));
+end
+
+%计算个体极值
+pbest=x;
+ind=find(min(fit)==fit);
+gbest=x(ind,:);
+
+%%更新速度和位置
+for i=1:k
+    for m=1:n
+        c1=cmax-(cmax-cmin)*(i/k);
+        c2=c1;
+        miu=wmin+(wmax-wmin)*rand;
+        w=miu+delta*randn;
+        v(m,:)=w*v(m,:)+c1*rand*(pbest(m,:)-x(m,:))+c2*rand*(gbest-x(m,:));
+        
+        v(m,find(v(m,:)<-5))=-5;
+        v(m,find(v(m,:)>5))=5;
+        
+        x(m,:)=x(m,:)+v(m,:);
+        x(m,find(x(m,:)<-100))=-100;
+        x(m,find(x(m,:)>100))=100;
+        
+        %重新计算适应度值
+        fit(m)=myfun(x(m,:));
+        if x(m,:)<myfun(pbest(m,:))
+            pbest(m,:)=x(m,:);
+        end
+        if myfun(pbest(m,:))<myfun(gbest)
+            gbest=pbest(m,:);
+        end
+    end
+    fitnessbest(i)=myfun(gbest);
+end
+
+plot(fitnessbest,'-','linewidth',2);
+xlabel('迭代次数');
+ylabel('适应度值');
+title('迭代优化过程');
+
+legend('PSO','SPSO','RPSO','RSPSO')
+hold on
+
+
+
+%目标函数
+function F=myfun(x)
+F=0;
+a=[50.37807858	58.64396147;
+    48.95943387	67.51124164;
+    87.70487234	36.10220492;
+    35.31418129	62.02784271;
+    44.94435566	81.11508851;
+    96.35302868	1.925747741;
+    4.229779791	8.387350828;
+    97.29583341	97.48016672;
+    18.92068431	65.13495324;
+    66.71203	23.12378162;];
+    for j=1:10
+        F=F+sqrt((x(1)-a(j,1))^2+(x(2)-a(j,2))^2);
+    end
+
+
 
